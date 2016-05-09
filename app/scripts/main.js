@@ -3,6 +3,8 @@ var album_date;
 var album_location;
 var photos = [];
 var photos_info = [];
+var cover_id;
+var cover_url;
 
 function getAlbumInfo(photoset_id) {
 	var request = new XMLHttpRequest();
@@ -32,6 +34,7 @@ function getAlbumPhotos(photoset_id) {
 	request.onreadystatechange = function () {
 	  if (this.readyState === 4) {
 	    var data = jQuery.parseJSON(this.responseText);
+	    cover_id = data.photoset.primary;
 	    var pages = data.photoset.pages;
 	    photos = photos.concat(data.photoset.photo);
 	    for(var i = 2; i <= pages; i++) {
@@ -46,6 +49,10 @@ function getAlbumPhotos(photoset_id) {
 			    if(i-1 == pages) {
 			    	//album done
 			    	for(var j = 0; j < photos.length; j++){
+			    		if(photos[j].id == cover_id) {
+			    			cover_url = "https://farm"+photos[j].farm+".staticflickr.com/"+photos[j].server+"/"+photos[j].id+"_"+photos[j].secret+"_h.jpg";
+			    			console.log("cover_url="+cover_url);
+			    		}
 			    		getPhotoInfo(photos[j].id, photos[j].secret, j);
 			    	}
 			    }
