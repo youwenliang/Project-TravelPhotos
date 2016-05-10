@@ -6,6 +6,9 @@ var photos_info = [];
 var cover_id;
 var cover_url;
 var tags = [];
+var counter = 0;
+var loaded = 0;
+var current = 0;
 
 function getAlbumInfo(photoset_id) {
 	var request = new XMLHttpRequest();
@@ -92,17 +95,19 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 	    var data = jQuery.parseJSON(this.responseText);
 	    photos_info[k] = {
 	    	"photo_title":data.photo.title._content,
-			"photo_url":"https://farm"+data.photo.farm+".staticflickr.com/"+data.photo.server+"/"+data.photo.id+"_"+data.photo.secret+"_n.jpg",
+			"photo_url":"https://farm"+data.photo.farm+".staticflickr.com/"+data.photo.server+"/"+data.photo.id+"_"+data.photo.secret+"_z.jpg",
 			"photo_date":data.photo.dates.taken.split(" ")[0],
 			"photo_time":data.photo.dates.taken.split(" ")[1],
 			"photo_tags":data.photo.tags.tag,
 			"photo_owner":data.photo.owner.realname,
 			"owner_url":"https://www.flickr.com/photos/"+data.photo.owner.path_alias
-	    }
+	    };
 	    for(var i = 0; i < data.photo.tags.tag.length; i++) {
 	    	tags.push(data.photo.tags.tag[i]._content);
 	    }
-	    if(k + 1 == photos.length) {
+	    loaded++;
+
+	    if(loaded == photos.length) {
 	    	//photos done
 	    	console.log(photos_info);
 	    	tags = unique(tags);
@@ -112,63 +117,9 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 	    	for(var i = 0; i < tags.length; i++) {
 	    		$('.button-group').append('<button class="button" data-filter=".'+tags[i]+'">'+tags[i]+'</button>');
 	    	}
-	    	for(var i = 0; i < photos_info.length; i++) {
-	    		if(photos_info[i] != null) {
-		    		var phototags = "";
-		    		for(var j = 0; j < photos_info[i].photo_tags.length; j++) {
-				    	phototags += photos_info[i].photo_tags[j]._content;
-				    	phototags += " ";
-				    }
-		    		$('.grid').append('<div class="photo '+phototags+'" style="background-image: url('+photos_info[i].photo_url+')"></div>');
-		    	}
-		    	//Load Images
-		    	if(i + 1 == photos_info.length) {
-		    		var count = $('.photo').length;
-				    $('.photo').each(function(i){
-				        var $this = $(this);
-				        var img = new Image;
-				        img.src = $this.css('background-image').replace(/url\(\"|\"\)$/ig, "");
-				        $(img).one('load', function(){
-				            var bgImgWidth = img.width;
-				            var bgImgHeight = img.height;
-				            var newHeight = $this.width()*bgImgHeight/bgImgWidth;
-				            $this.css('height',newHeight);
-				            setTimeout(function(){
-				                $this.css('opacity', 1);
-				                // console.log(i+"==="+count);
-				                
-				                    // console.log("done!");
-				                    $('.grid').isotope({
-				                      itemSelector: '.photo',
-				                      masonry: {
-				                        // columnWidth: 212,
-				                        isFitWidth: true
-				                      }
-				                    });
-				                if(i == count-1) {
-				                    $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
-
-				                    $('.button-group').each( function( i, buttonGroup ) {
-									  var $buttonGroup = $( buttonGroup );
-									  $buttonGroup.on( 'click', 'button', function() {
-									    if($(this).hasClass('is-checked')) $(this).removeClass('is-checked');
-									    else $(this).addClass('is-checked');
-									    
-									    var filtervalue = "";
-									    $('.is-checked').each(function(i){ 
-									      filtervalue += $(this).attr('data-filter');
-									      
-									    });
-									    console.log(filtervalue);
-									    $('.grid').isotope({ filter: filtervalue });
-									  });
-									});
-				                }
-				            }, i*0);
-				        });
-				    });
-		    	}
-	    	}
+	    	$('.button-group').children().css('opacity',0);
+	    	appendPhotos(50);
+	    	current = 50;
 	    }
 	  }
 	};
@@ -195,7 +146,8 @@ $(document).ready(function(){
 	getAlbumPhotos(album_id);
 
 	$('#close').click(function(){
-	    $('.button-group').slideToggle('slow', function(){
+		$('.button-group').children().css('opacity',0);
+	    $('.button-group').slideToggle(450, function(){
 	    	$('#filtering span').css('display','block');
 	    	setTimeout(function(){
 	    		$('#filtering span').css('opacity','1');
@@ -203,19 +155,94 @@ $(document).ready(function(){
 	    });
 	});
 	$('#filtering span').click(function(){
-	    $('.button-group').slideToggle('slow', function(){
+	    $('.button-group').slideToggle(450, function(){
 	    	$('#filtering span').css('opacity',0);
 	    	setTimeout(function(){
 	    		$('#filtering span').css('display','none');
 	    	}, 250);
 	    });
+	    setTimeout(function(){
+	    	$('.button-group').children().css('opacity',1);
+	    }, 250);
+	});
+
+	$('.button-group').each( function( i, buttonGroup ) {
+	  var $buttonGroup = $( buttonGroup );
+	  $buttonGroup.on( 'click', 'button', function() {
+	    if($(this).hasClass('is-checked')) $(this).removeClass('is-checked');
+	    else $(this).addClass('is-checked');
+	    
+	    var filtervalue = "";
+	    $('.is-checked').each(function(i){ 
+	      filtervalue += $(this).attr('data-filter');
+	      
+	    });
+	    console.log(filtervalue);
+	    $('.grid').isotope({ filter: filtervalue });
+	  });
 	});
 })
 
+
+//Events
 $( window ).resize(function() {
     $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
+});
+
+var flag = false;
+
+$(window).scroll(function() {
+   if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+   	if(!flag) {
+	   flag = true;
+       appendPhotos(current+50);
+	   current+=50;
+	}
+   }
 });
 
 $('.grid').on( 'layoutComplete', function( event, filteredItems ) {
     $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 });
+
+//Append Photos
+function appendPhotos(number){
+	console.log(current+"-"+number);
+	var max = number;
+	if(max > photos.length) max = photos.length;
+	for(var i = current; i < max; i++) {
+		var phototags = "";
+		for(var j = 0; j < photos_info[i].photo_tags.length; j++) {
+	    	phototags += photos_info[i].photo_tags[j]._content;
+	    	phototags += " ";
+	    }
+	    var $items = $('<div class="photo '+phototags+'" style="background-image: url('+photos_info[i].photo_url+')"></div>');
+		if(number > 50) $('.grid').append($items).isotope('appended', $items);
+		else $('.grid').append($items);
+    }
+    	
+    $('.photo').each(function(i){
+    	if(i < current) ;
+    	else {
+	        var $this = $(this);
+	        var img = new Image;
+	        img.src = $this.css('background-image').replace(/url\(\"|\"\)$/ig, "");
+	        $(img).one('load', function(){
+	            var bgImgWidth = img.width;
+	            var bgImgHeight = img.height;
+	            var newHeight = $this.width()*bgImgHeight/bgImgWidth;
+	            $this.css('height',newHeight);
+	            // console.log("!");
+	            $('.grid').isotope({
+	              itemSelector: '.photo',
+	              masonry: {
+	                // columnWidth: 212,
+	                isFitWidth: true
+	              }
+	            });
+	            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
+	        });
+	    }
+	    flag = false;
+    });
+}

@@ -283,6 +283,8 @@ body {
   font-size: 12pt;
   color: #565A5C;
   font-weight: 700;
+  -webkit-transition: opacity .25s ease-in-out;
+  transition: opacity .25s ease-in-out;
 }
 
 .filter i {
@@ -297,6 +299,8 @@ body {
   top: 22px;
   right: 22px;
   cursor: pointer;
+  -webkit-transition: opacity .25s ease-in-out;
+  transition: opacity .25s ease-in-out;
 }
 
 #filtering {
@@ -326,6 +330,8 @@ body {
   font-size: 16px;
   /*text-shadow: 0 1px white;*/
   cursor: pointer;
+  -webkit-transition: opacity .25s ease-in-out;
+  transition: opacity .25s ease-in-out;
 }
 
 .button:hover {
@@ -399,4 +405,11 @@ body {
   transition: opacity .5s ease-in-out;
   float: left;
   margin: 5px;
+  cursor: pointer;
+}
+
+.photo:hover {
+  opacity: .6;
+  -webkit-transition: opacity .25s ease-in-out;
+  transition: opacity .25s ease-in-out;
 }
