@@ -7,10 +7,11 @@
 
 /* Space out content a bit */
 body {
-  padding-top: 20px;
-  padding-bottom: 20px;
+  /*padding-top: 20px;
+  padding-bottom: 20px;*/
   font-family: "apercu", "sans-serif";
   background-color: #F3F5F6;
+  overflow-x: hidden;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -217,6 +218,13 @@ body {
 }
 /* Custom CSS */
 
+.album-banner {
+  height: 230px;
+  width: 100%;
+  /*position: absolute;*/
+  /*top: 0;*/
+}
+
 .album-banner-black {
   height: 230px;
   width: 100%;
@@ -224,12 +232,13 @@ body {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  position: absolute;
-  top: 0;
+  /*position: absolute;*/
+  /*top: 0;*/
   z-index: -1;
 }
 
 .album-banner-black:after {
+  height: 230px;
   background-color: #000;
   position: absolute;
   top: 0;
@@ -241,14 +250,23 @@ body {
 }
 
 #album-title {
+  position: absolute;
   text-align: center;
   color: #fff;
   font-weight: 500;
   font-size: 32pt;
-  margin-top: 50px;
+  top: 70px;
+  left: 0;
+  right: 0;
+  margin: auto;
 }
 
 .album-info {
+  position: absolute;
+  top: 120px;
+  left: 0;
+  right: 0;
+  margin: auto;
   text-align: center;
   color: #fff;
   font-weight: 500;
@@ -259,4 +277,126 @@ body {
   padding-left: 10px;
   top: 5px;
   position: relative;
+}
+
+.filter {
+  font-size: 12pt;
+  color: #565A5C;
+  font-weight: 700;
+}
+
+.filter i {
+  top: 5px;
+  padding-right: 5px;
+  position: relative; 
+}
+
+#close {
+  color: #82888A;
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  cursor: pointer;
+}
+
+#filtering {
+  display: block;
+  text-align: right;
+  padding: 22px;
+  height: 30px;
+}
+
+#filtering span {
+  display: block;
+  transition: opacity .25s ease-in-out;
+  cursor: pointer;
+}
+
+/* ---- button ---- */
+
+.button {
+  display: inline-block;
+  padding: 6px 18px;
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0);
+  border: #565A5C 2px solid;
+  border-radius: 4px !important;
+  /*background-image: linear-gradient( to bottom, hsla(0, 0%, 0%, 0), hsla(0, 0%, 0%, 0.2) );*/
+  color: #565A5C;
+  font-size: 16px;
+  /*text-shadow: 0 1px white;*/
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #565A5C;
+  /*text-shadow: 0 1px hsla(0, 0%, 100%, 0.5);*/
+  color: #fff;
+}
+
+.button:active,
+.button.is-checked {
+  background-color: #565A5C;
+}
+
+.button.is-checked {
+  color: white;
+  /*text-shadow: 0 -1px hsla(0, 0%, 0%, 0.8);*/
+}
+
+.button:active,
+.button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ---- button-group ---- */
+
+.button-group {
+  position: relative;
+  width: 100%;
+  padding: 30px;
+  background-color: #fff;
+  overflow: hidden;
+  display: none;
+}
+
+.button-group:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.button-group .button {
+  float: left;
+  border-radius: 0;
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+.grid {
+  /*background: #EEE;*/
+  position: relative;
+  margin-top: 30px;
+  transition: margin .25s ease-in-out;
+}
+
+/* clear fix */
+.grid:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.photo {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  display: inline-block;
+  width: 320px;
+  /*opacity: 0;*/
+  -webkit-transition: opacity .5s ease-in-out;
+  transition: opacity .5s ease-in-out;
+  float: left;
+  margin: 5px;
 }

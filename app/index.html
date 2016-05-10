@@ -2,7 +2,7 @@
 <html class="no-js">
   <head>
     <meta charset="utf-8">
-    <title>Project TravelPhotos</title>
+    <title>Travel Photos</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link rel="shortcut icon" href="/favicon.ico">
@@ -17,6 +17,7 @@
     <!-- endbuild -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
+
   </head>
   <body>
     <!--[if lt IE 10]>
@@ -28,43 +29,17 @@
       <h1 id="album-title"></h1>
       <p class="album-info"><span id="album-date"></span><i class="material-icons">location_on</i><span id="album-location"></span></p>
     </div>
+    <div class="button-group filters-button-group">
+      <p class="filter">
+        <i class="material-icons">filter_list</i><span>Filter Photos by:</span>
+      </p>
+      <i id="close" class="material-icons">close</i>
+    </div>
 
-    <!-- <div class="container">
-      <div class="header">
-        <ul class="nav nav-pills pull-right">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-        <h3 class="text-muted">Project TravelPhotos</h3>
-      </div>
-
-      <div class="jumbotron">
-        <h1>'Allo, 'Allo!</h1>
-        <p class="lead">Always a pleasure scaffolding your apps.</p>
-        <p><a class="btn btn-lg btn-success" href="#">Splendid! <span class="glyphicon glyphicon-ok"></span></a></p>
-      </div>
-
-      <div class="row marketing">
-        <div class="col-lg-6">
-          <h4>HTML5 Boilerplate</h4>
-          <p>HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.</p>
-
-
-
-          <h4>Bootstrap</h4>
-          <p>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.</p>
-
-
-        </div>
-      </div>
-
-      <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
-      </div>
-
-    </div> -->
-
+    <p id="filtering" class="filter">
+        <span><i class="material-icons">filter_list</i>Filter Photos</span>
+    </p>
+    <div class="grid"></div>
 
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
@@ -96,7 +71,7 @@
         <script src="bower_components/bootstrap/js/collapse.js"></script>
         <script src="bower_components/bootstrap/js/tab.js"></script>
         <!-- endbuild -->
-
+        <script src="https://npmcdn.com/isotope-layout@3.0/dist/isotope.pkgd.js"></script>
         <!-- build:js({app,.tmp}) scripts/main.js -->
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
