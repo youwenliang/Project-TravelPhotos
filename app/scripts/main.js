@@ -12,6 +12,8 @@ var current = 0;
 
 var initial = 20;
 var increment = 10;
+var current_photo;
+var mode = 0;
 
 function getAlbumInfo(photoset_id) {
 	var request = new XMLHttpRequest();
@@ -168,7 +170,6 @@ $(document).ready(function(){
 	    	$('.button-group').children().css('opacity',1);
 	    }, 250);
 	});
-
 	$('.button-group').each( function( i, buttonGroup ) {
 	  var $buttonGroup = $( buttonGroup );
 	  $buttonGroup.on( 'click', 'button', function() {
@@ -188,7 +189,8 @@ $(document).ready(function(){
 
 
 //Events
-$( window ).resize(function() {
+
+$(window).resize(function() {
     $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 });
 
@@ -262,24 +264,67 @@ function appendPhotos(number){
 		            setTimeout(function(){
 		            	$('body').css('opacity',1);
 		            	$('.photo').click(function(){
+		            		current_photo = $(this);
 		            		var src = $(this).find('img').attr('src').replace('_z.jpg', '_h.jpg');
-							$('.lightbox').find('img').attr('src', src);		
-							$('.lightbox').css('opacity',1);
-							$('.lightbox').css('z-index',10);
-							$('body').css('overflow-y', 'hidden');
+							$('.lightbox').find('img').attr('src', src);
+							$('.lightbox .backdrop').css('background-image', 'url('+src+')');
+							// $('body').css('overflow-y', 'hidden');
 							$('.lightbox').imagesLoaded(function(){
+								$('.lightbox').css('opacity',1);
+								$('.lightbox').css('z-index',10);
 								$('.lightbox img').css('opacity',1);
 							});
+							mode = 1;
 						});
 						$('.lightbox').click(function(){
 							$('.lightbox').css('opacity',0);
-							$('body').css('overflow-y', 'scroll');
+							// $('body').css('overflow-y', 'scroll');
 							setTimeout(function(){
 								$('.lightbox').find('img').attr('src', '');		
 								$('.lightbox').css('z-index',-1);
 								$('.lightbox img').css('opacity',0);
 							},250);
+							mode = 0;
 						});
+						$(document).keydown(function(e) {
+							if(mode == 1) {
+							    switch(e.which) {
+							        case 37: // left
+							        console.log(current_photo);
+							        var src = current_photo.prev().find('img').attr('src').replace('_z.jpg', '_h.jpg');
+							        current_photo = current_photo.prev();
+							        $('.lightbox').find('img').css('opacity', 0);
+							        $('.lightbox .backdrop').css('background-image', 'url('+src+')');
+							        setTimeout(function(){
+							        	$('.lightbox').find('img').attr('src', src);
+							        	$('.lightbox').find('img').css('opacity', 1);
+							        },250);
+							        break;
+
+							        case 38: // up
+							        break;
+
+							        case 39: // right
+							        console.log(current_photo);
+							        var src = current_photo.next().find('img').attr('src').replace('_z.jpg', '_h.jpg');
+							        current_photo = current_photo.next();
+							        $('.lightbox').find('img').css('opacity', 0);
+									$('.lightbox .backdrop').css('background-image', 'url('+src+')');
+									setTimeout(function(){
+							        	$('.lightbox').find('img').attr('src', src);
+							        	$('.lightbox').find('img').css('opacity', 1);
+							        },250);
+							        break;
+
+							        case 40: // down
+							        break;
+
+							        default: return; // exit this handler for other keys
+							    }
+							    e.preventDefault(); // prevent the default action (scroll / move caret)
+							}
+						});
+
 		            }, 250);
 	            });
 	        }
