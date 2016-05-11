@@ -10,6 +10,9 @@ var counter = 0;
 var loaded = 0;
 var current = 0;
 
+var initial = 20;
+var increment = 10;
+
 function getAlbumInfo(photoset_id) {
 	var request = new XMLHttpRequest();
 	request.open('GET', 'https://api.flickr.com/services/rest/?method=flickr.photosets.getInfo&api_key=b5915b4e4a36d456caa767bdb9003cbc&photoset_id='+photoset_id+'&user_id=129588168%40N02&format=json&nojsoncallback=1');
@@ -118,8 +121,8 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 	    		$('.button-group').append('<button class="button" data-filter=".'+tags[i]+'">'+tags[i]+'</button>');
 	    	}
 	    	$('.button-group').children().css('opacity',0);
-	    	appendPhotos(50);
-	    	current = 50;
+	    	appendPhotos(initial);
+	    	current = initial;
 	    }
 	  }
 	};
@@ -139,7 +142,7 @@ function unique(list) {
 //Finland Trip - 72157661256330416
 //New York Trip - 72157651866953659
 //Tokyo Trip - 72157649613805629
-var album_id = "72157667507455746";
+var album_id = "72157661256330416";
 
 $(document).ready(function(){
 	getAlbumInfo(album_id);
@@ -195,8 +198,8 @@ $(window).scroll(function() {
    if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
    	if(!flag) {
 	   flag = true;
-       appendPhotos(current+50);
-	   current+=50;
+       appendPhotos(current+increment);
+	   current+=increment;
 	}
    }
 });
@@ -216,38 +219,51 @@ function appendPhotos(number){
 	    	phototags += photos_info[i].photo_tags[j]._content;
 	    	phototags += " ";
 	    }
-	    var $items = $('<div class="photo '+phototags+'" style="background-image: url('+photos_info[i].photo_url+')"></div>');
-		if(number > 50) $('.grid').append($items).isotope('appended', $items);
+	    var url = photos_info[i].photo_url;
+	    var $items = $('<div class="photo '+phototags+'"><img class="hide" src="'+url+'"/></div>');
+		if(number > initial) {
+			$('.grid').append($items).isotope('appended', $items);
+			console.log("!?");
+		}
 		else $('.grid').append($items);
     }
-    	
+    var checking = 0;
     $('.photo').each(function(i){
+    	checking++;
     	if(i < current) ;
     	else {
 	        var $this = $(this);
 	        var img = new Image;
-	        img.src = $this.css('background-image').replace(/url\(\"|\"\)$/ig, "");
+	        img.src = $this.find('img').attr('src').replace(/url\(\"|\"\)$/ig, "");
 	        $(img).one('load', function(){
 	            var bgImgWidth = img.width;
 	            var bgImgHeight = img.height;
 	            var newHeight = $this.width()*bgImgHeight/bgImgWidth;
 	            $this.css('height',newHeight);
-	            // console.log("!");
-	            $('.grid').isotope({
-	              itemSelector: '.photo',
-	              masonry: {
-	                // columnWidth: 212,
-	                isFitWidth: true
-	              },
-	              hiddenStyle: {
-				    opacity: 0
-				  },
-				  visibleStyle: {
-				    opacity: 1
-				  }
-	            });
-	            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 	        });
+	        if(checking == $('.photo').length){
+	        	$('.grid').imagesLoaded( function() {
+	        		$('.hide').removeClass('hide');
+	            	console.log("done!!");
+		            $('.grid').isotope({
+		              itemSelector: '.photo',
+		              masonry: {
+		                // columnWidth: 212,
+		                isFitWidth: true
+		              },
+		              hiddenStyle: {
+					    opacity: 0
+					  },
+					  visibleStyle: {
+					    opacity: 1
+					  }
+		            });
+		            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
+		            setTimeout(function(){
+		            	$('body').css('opacity',1);
+		            }, 250);
+	            });
+	        }
 	    }
 	    flag = false;
     });

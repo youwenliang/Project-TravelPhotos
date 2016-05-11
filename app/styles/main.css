@@ -13,6 +13,9 @@ body {
   background-color: #F3F5F6;
   overflow-x: hidden;
   padding-bottom: 80px;
+  opacity: 0;
+  -webkit-transition: opacity .25s ease-in-out;
+  transition: opacity .25s ease-in-out;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -414,4 +417,13 @@ body {
   opacity: .6;
   -webkit-transition: opacity .25s ease-in-out;
   transition: opacity .25s ease-in-out;
+}
+
+.photo img {
+  max-width:100%;
+  max-height:100%;
+}
+
+.hide {
+  display: none;
 }
