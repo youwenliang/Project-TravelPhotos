@@ -238,7 +238,13 @@ function appendPhotos(number){
 	              masonry: {
 	                // columnWidth: 212,
 	                isFitWidth: true
-	              }
+	              },
+	              hiddenStyle: {
+				    opacity: 0
+				  },
+				  visibleStyle: {
+				    opacity: 1
+				  }
 	            });
 	            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 	        });
