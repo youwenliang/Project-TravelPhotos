@@ -142,7 +142,7 @@ function unique(list) {
 //Finland Trip - 72157661256330416
 //New York Trip - 72157651866953659
 //Tokyo Trip - 72157649613805629
-var album_id = "72157661256330416";
+var album_id = "72157667507455746";
 
 $(document).ready(function(){
 	getAlbumInfo(album_id);
@@ -261,6 +261,25 @@ function appendPhotos(number){
 		            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 		            setTimeout(function(){
 		            	$('body').css('opacity',1);
+		            	$('.photo').click(function(){
+		            		var src = $(this).find('img').attr('src').replace('_z.jpg', '_h.jpg');
+							$('.lightbox').find('img').attr('src', src);		
+							$('.lightbox').css('opacity',1);
+							$('.lightbox').css('z-index',10);
+							$('body').css('overflow-y', 'hidden');
+							$('.lightbox').imagesLoaded(function(){
+								$('.lightbox img').css('opacity',1);
+							});
+						});
+						$('.lightbox').click(function(){
+							$('.lightbox').css('opacity',0);
+							$('body').css('overflow-y', 'scroll');
+							setTimeout(function(){
+								$('.lightbox').find('img').attr('src', '');		
+								$('.lightbox').css('z-index',-1);
+								$('.lightbox img').css('opacity',0);
+							},250);
+						});
 		            }, 250);
 	            });
 	        }
