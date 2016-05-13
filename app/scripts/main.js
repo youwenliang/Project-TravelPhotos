@@ -14,6 +14,7 @@ var initial = 20;
 var increment = 10;
 var current_photo;
 var mode = 0;
+var init = false;
 
 function getAlbumInfo(photoset_id) {
 	var request = new XMLHttpRequest();
@@ -67,7 +68,9 @@ function getAlbumPhotos(photoset_id) {
 				    			cover_url = "https://farm"+photos[j].farm+".staticflickr.com/"+photos[j].server+"/"+photos[j].id+"_"+photos[j].secret+"_h.jpg";
 				    			console.log(cover_url);
 				    			$('.album-banner-black').css('background-image','url('+cover_url+')');
-				    			$('.album-banner-black').imagesLoaded(function(){
+				    			var img = new Image;
+						        img.src = $('.album-banner-black').css('background-image').replace(/url\(\"|\"\)$/ig, "");
+						        $(img).one('load', function(){
 				    				$('body').css('opacity',1);
 				    			});
 				    		}
@@ -84,6 +87,11 @@ function getAlbumPhotos(photoset_id) {
 	    			cover_url = "https://farm"+photos[j].farm+".staticflickr.com/"+photos[j].server+"/"+photos[j].id+"_"+photos[j].secret+"_h.jpg";
 	    			console.log(cover_url);
 	    			$('.album-banner-black').css('background-image','url('+cover_url+')');
+	    			var img = new Image;
+			        img.src = $('.album-banner-black').css('background-image').replace(/url\(\"|\"\)$/ig, "");
+			        $(img).one('load', function(){
+	    				$('body').css('opacity',1);
+	    			});
 	    		}
 	    		getPhotoInfo(photos[j].id, photos[j].secret, j);
 	    	}
@@ -102,6 +110,7 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 	  if (this.readyState === 4) {
 	    var data = jQuery.parseJSON(this.responseText);
 	    photos_info[k] = {
+	    	"photo_size":"",
 	    	"photo_title":data.photo.title._content,
 			"photo_url":"https://farm"+data.photo.farm+".staticflickr.com/"+data.photo.server+"/"+data.photo.id+"_"+data.photo.secret+"_h.jpg",
 			"photo_date":data.photo.dates.taken.split(" ")[0],
@@ -110,6 +119,7 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 			"photo_owner":data.photo.owner.realname,
 			"owner_url":"https://www.flickr.com/photos/"+data.photo.owner.path_alias
 	    };
+	    getPhotoSize(photo_id, photo_secret, k);
 	    for(var i = 0; i < data.photo.tags.tag.length; i++) {
 	    	tags.push(data.photo.tags.tag[i]._content);
 	    }
@@ -128,6 +138,25 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 	    	$('.button-group').children().css('opacity',0);
 	    	appendPhotos(initial);
 	    	current = initial;
+	    }
+	  }
+	};
+	request.send();
+}
+
+function getPhotoSize(photo_id, photo_secret, k) {
+	var request = new XMLHttpRequest();
+	request.open('GET', 'https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=b5915b4e4a36d456caa767bdb9003cbc&photo_id='+photo_id+'&secret='+photo_secret+'&format=json&nojsoncallback=1');
+	request.setRequestHeader('Accept','application/json');
+
+	request.onreadystatechange = function () {
+	  if (this.readyState === 4) {
+	    var data = jQuery.parseJSON(this.responseText);
+	    if(parseInt(data.sizes.size[2].width) > parseInt(data.sizes.size[2].height)) {
+	    	photos_info[k].photo_size = true;
+	    }
+	    else {
+	    	photos_info[k].photo_size = false;
 	    }
 	  }
 	};
@@ -188,6 +217,14 @@ $(document).ready(function(){
 	    $('.grid').isotope({ filter: filtervalue });
 	  });
 	});
+
+	// window.setInterval(function(){
+	//   if(!flag && current+increment <= photos.length && init) {
+	// 	   flag = true;
+	//        appendPhotos(current+increment);
+	// 	   current+=increment;
+	// 	}
+	// }, 5000);
 })
 
 
@@ -206,8 +243,11 @@ $(window).scroll(function() {
        appendPhotos(current+increment);
 	   current+=increment;
 	}
+
    }
 });
+
+
 
 $('.grid').on( 'layoutComplete', function( event, filteredItems ) {
     $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
@@ -218,6 +258,7 @@ function appendPhotos(number){
 	console.log(current+"-"+number);
 	var max = number;
 	if(max > photos.length) max = photos.length;
+
 	for(var i = current; i < max; i++) {
 		var phototags = "";
 		for(var j = 0; j < photos_info[i].photo_tags.length; j++) {
@@ -225,12 +266,15 @@ function appendPhotos(number){
 	    	phototags += " ";
 	    }
 	    var url = photos_info[i].photo_url;
-	    var $items = $('<div class="photo '+phototags+'"><img class="hide" src="'+url+'"/></div>');
+	    var size = "";
+	    if(photos_info[i].photo_size) size="landscape ";
+	    else size="portrait ";
+
+	    var $items = $('<div class="photo '+size+phototags+'"><img src="'+url+'"/></div>');
 		if(number > initial) {
 			$('.grid').append($items).isotope('appended', $items);
-			console.log("!?");
 		}
-		else $('.grid').append($items);
+		else $('.grid').append('<div class="photo hiding '+size+phototags+'"><img src="'+url+'"/></div>');
     }
     var checking = 0;
     $('.photo').each(function(i){
@@ -240,17 +284,26 @@ function appendPhotos(number){
 	        var $this = $(this);
 	        var img = new Image;
 	        img.src = $this.find('img').attr('src').replace(/url\(\"|\"\)$/ig, "");
+	        $this.css('background-image', "url("+$this.find('img').attr('src').replace('_h.jpg', '_t.jpg')+")");
 	        $(img).one('load', function(){
-	            var bgImgWidth = img.width;
+	            if(number > initial) {
+	            	$this.find('img').css('opacity',1);
+	            }
+	        });
+	        var thumb = new Image;
+	        thumb.src = $this.find('img').attr('src').replace(/url\(\"|\"\)$/ig, "").replace('_h.jpg', '_t.jpg');
+	        $(thumb).one('load', function(){
+	        	var bgImgWidth = img.width;
 	            var bgImgHeight = img.height;
 	            var newHeight = $this.width()*bgImgHeight/bgImgWidth;
 	            $this.css('height',newHeight);
 	        });
+
 	        if(checking == $('.photo').length){
-	        	$('.grid').imagesLoaded( function() {
-	        		$('.hide').removeClass('hide');
-	            	console.log("done!!");
-		            $('.grid').isotope({
+		        console.log("done!!");
+	        	
+	        	if(number > initial) {
+		            var $grid = $('.grid').isotope({
 		              itemSelector: '.photo',
 		              masonry: {
 		                // columnWidth: 212,
@@ -263,82 +316,109 @@ function appendPhotos(number){
 					    opacity: 1
 					  }
 		            });
-		            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
-		            setTimeout(function(){
-		            	$('.photo').click(function(){
-		            		current_photo = $(this);
-		            		var src = $(this).find('img').attr('src');
-							$('.lightbox').find('img').attr('src', src);
-							$('.lightbox .backdrop').css('background-image', 'url('+src+')');
-							// $('body').css('overflow-y', 'hidden');
-							$('.lightbox').imagesLoaded(function(){
-								$('.lightbox').css('opacity',1);
-								$('.lightbox').css('z-index',10);
-								$('.lightbox img').css('opacity',1);
-							});
-							mode = 1;
-						});
-						$('.lightbox').click(function(){
-							$('.lightbox').css('opacity',0);
-							// $('body').css('overflow-y', 'scroll');
-							setTimeout(function(){
-								$('.lightbox').find('img').attr('src', '');		
-								$('.lightbox').css('z-index',-1);
-								$('.lightbox img').css('opacity',0);
-							},250);
-							mode = 0;
-						});
-						$(document).keydown(function(e) {
-							if(mode == 1) {
-							    switch(e.which) {
-							        case 37: // left
-							        console.log(current_photo.prev());
-							        if(current_photo.prev().length != 0) {
-								        var src = current_photo.prev().find('img').attr('src');
-								        current_photo = current_photo.prev();
-								        $('.lightbox').find('img').css('opacity', 0);
-								        $('.lightbox .backdrop').css('opacity', 0);
-								        $('.lightbox .backdrop').css('background-image', 'url('+src+')');
-								        setTimeout(function(){
-								        	$('.lightbox').find('img').attr('src', src);
-								        	$('.lightbox').find('img').css('opacity', 1);
-								        	$('.lightbox .backdrop').css('opacity', .3);
-								        },250);
-								    }
-							        break;
-
-							        case 38: // up
-							        break;
-
-							        case 39: // right
-							        console.log(current_photo.next());
-							        if(current_photo.next().length != 0) {
-								        var src = current_photo.next().find('img').attr('src');
-								        current_photo = current_photo.next();
-								        $('.lightbox').find('img').css('opacity', 0);
-								        $('.lightbox .backdrop').css('opacity', 0);
-										$('.lightbox .backdrop').css('background-image', 'url('+src+')');
-										setTimeout(function(){
-								        	$('.lightbox').find('img').attr('src', src);
-								        	$('.lightbox').find('img').css('opacity', 1);
-								        	$('.lightbox .backdrop').css('opacity', .3);
-								        },250);
-									}
-							        break;
-
-							        case 40: // down
-							        break;
-
-							        default: return; // exit this handler for other keys
-							    }
-							    e.preventDefault(); // prevent the default action (scroll / move caret)
-							}
-						});
-
-		            }, 250);
-	            });
+		            $grid.imagesLoaded().progress( function() {
+					  $grid.isotope('layout');
+					});
+		        }
+		        else {
+		        	var $grid = $('.grid').imagesLoaded( function() {
+		        	  $('.photo img').css('opacity', 1);
+					  // init Isotope after all images have loaded
+					  $grid.isotope({
+					      itemSelector: '.photo',
+			              masonry: {
+			                // columnWidth: 212,
+			                isFitWidth: true
+			              },
+			              hiddenStyle: {
+						    opacity: 0
+						  },
+						  visibleStyle: {
+						    opacity: 1
+						  }
+					  });
+					  $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
+					  setTimeout(function(){
+					  	$('.hiding').removeClass('hiding');
+					  }, 250);
+					});
+		        }
+			    PhotosDone();
+			    init = true;
 	        }
 	    }
 	    flag = false;
     });
+}
+
+function PhotosDone(){
+	$('.photo').click(function(){
+		current_photo = $(this);
+		var src = $(this).find('img').attr('src');
+		$('.lightbox').find('img').attr('src', src);
+		$('.lightbox .backdrop').css('background-image', 'url('+src+')');
+		// $('body').css('overflow-y', 'hidden');
+		$('.lightbox').imagesLoaded(function(){
+			$('.lightbox').css('opacity',1);
+			$('.lightbox').css('z-index',10);
+			$('.lightbox img').css('opacity',1);
+		});
+		mode = 1;
+	});
+	$('.lightbox').click(function(){
+		$('.lightbox').css('opacity',0);
+		// $('body').css('overflow-y', 'scroll');
+		setTimeout(function(){
+			$('.lightbox').find('img').attr('src', '');		
+			$('.lightbox').css('z-index',-1);
+			$('.lightbox img').css('opacity',0);
+		},250);
+		mode = 0;
+	});
+	$(document).keydown(function(e) {
+		if(mode == 1) {
+		    switch(e.which) {
+		        case 37: // left
+		        console.log(current_photo.prev());
+		        if(current_photo.prev().length != 0) {
+			        var src = current_photo.prev().find('img').attr('src');
+			        current_photo = current_photo.prev();
+			        $('.lightbox').find('img').css('opacity', 0);
+			        $('.lightbox .backdrop').css('opacity', 0);
+			        $('.lightbox .backdrop').css('background-image', 'url('+src+')');
+			        setTimeout(function(){
+			        	$('.lightbox').find('img').attr('src', src);
+			        	$('.lightbox').find('img').css('opacity', 1);
+			        	$('.lightbox .backdrop').css('opacity', .3);
+			        },250);
+			    }
+		        break;
+
+		        case 38: // up
+		        break;
+
+		        case 39: // right
+		        console.log(current_photo.next());
+		        if(current_photo.next().length != 0) {
+			        var src = current_photo.next().find('img').attr('src');
+			        current_photo = current_photo.next();
+			        $('.lightbox').find('img').css('opacity', 0);
+			        $('.lightbox .backdrop').css('opacity', 0);
+					$('.lightbox .backdrop').css('background-image', 'url('+src+')');
+					setTimeout(function(){
+			        	$('.lightbox').find('img').attr('src', src);
+			        	$('.lightbox').find('img').css('opacity', 1);
+			        	$('.lightbox .backdrop').css('opacity', .3);
+			        },250);
+				}
+		        break;
+
+		        case 40: // down
+		        break;
+
+		        default: return; // exit this handler for other keys
+		    }
+		    e.preventDefault(); // prevent the default action (scroll / move caret)
+		}
+	});
 }

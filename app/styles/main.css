@@ -416,6 +416,7 @@ body {
   background-repeat: no-repeat;
   background-position: center center;
   display: inline-block;
+  background-color: #DFE3E5;
   width: 320px;
   /*opacity: 0;*/
   -webkit-transition: opacity .4s ease-in-out;
@@ -423,6 +424,14 @@ body {
   float: left;
   margin: 5px;
   cursor: pointer;
+}
+
+.photo.portrait {
+  height: 483.321px;
+}
+
+.photo.landscape {
+  height: 214.2px;
 }
 
 .photo:hover {
@@ -434,10 +443,13 @@ body {
 .photo img {
   max-width:100%;
   max-height:100%;
+  opacity: 0;
+  -webkit-transition: opacity .25s ease-in-out;
+  transition: opacity .25s ease-in-out;
 }
 
-.hide {
-  display: none;
+.hiding {
+  opacity: 0;
 }
 
 /* ---- Lightbox ---- */
