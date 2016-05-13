@@ -67,6 +67,9 @@ function getAlbumPhotos(photoset_id) {
 				    			cover_url = "https://farm"+photos[j].farm+".staticflickr.com/"+photos[j].server+"/"+photos[j].id+"_"+photos[j].secret+"_h.jpg";
 				    			console.log(cover_url);
 				    			$('.album-banner-black').css('background-image','url('+cover_url+')');
+				    			$('.album-banner-black').imagesLoaded(function(){
+				    				$('body').css('opacity',1);
+				    			});
 				    		}
 				    		getPhotoInfo(photos[j].id, photos[j].secret, j);
 				    	}
@@ -100,7 +103,7 @@ function getPhotoInfo(photo_id, photo_secret, k) {
 	    var data = jQuery.parseJSON(this.responseText);
 	    photos_info[k] = {
 	    	"photo_title":data.photo.title._content,
-			"photo_url":"https://farm"+data.photo.farm+".staticflickr.com/"+data.photo.server+"/"+data.photo.id+"_"+data.photo.secret+"_z.jpg",
+			"photo_url":"https://farm"+data.photo.farm+".staticflickr.com/"+data.photo.server+"/"+data.photo.id+"_"+data.photo.secret+"_h.jpg",
 			"photo_date":data.photo.dates.taken.split(" ")[0],
 			"photo_time":data.photo.dates.taken.split(" ")[1],
 			"photo_tags":data.photo.tags.tag,
@@ -153,7 +156,7 @@ $(document).ready(function(){
 	$('#close').click(function(){
 		$('.button-group').children().css('opacity',0);
 	    $('.button-group').slideToggle(450, function(){
-	    	$('#filtering span').css('display','block');
+	    	$('#filtering span').css('display','inline');
 	    	setTimeout(function(){
 	    		$('#filtering span').css('opacity','1');
 	    	}, 10);
@@ -262,10 +265,9 @@ function appendPhotos(number){
 		            });
 		            $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 		            setTimeout(function(){
-		            	$('body').css('opacity',1);
 		            	$('.photo').click(function(){
 		            		current_photo = $(this);
-		            		var src = $(this).find('img').attr('src').replace('_z.jpg', '_h.jpg');
+		            		var src = $(this).find('img').attr('src');
 							$('.lightbox').find('img').attr('src', src);
 							$('.lightbox .backdrop').css('background-image', 'url('+src+')');
 							// $('body').css('overflow-y', 'hidden');
@@ -290,30 +292,38 @@ function appendPhotos(number){
 							if(mode == 1) {
 							    switch(e.which) {
 							        case 37: // left
-							        console.log(current_photo);
-							        var src = current_photo.prev().find('img').attr('src').replace('_z.jpg', '_h.jpg');
-							        current_photo = current_photo.prev();
-							        $('.lightbox').find('img').css('opacity', 0);
-							        $('.lightbox .backdrop').css('background-image', 'url('+src+')');
-							        setTimeout(function(){
-							        	$('.lightbox').find('img').attr('src', src);
-							        	$('.lightbox').find('img').css('opacity', 1);
-							        },250);
+							        console.log(current_photo.prev());
+							        if(current_photo.prev().length != 0) {
+								        var src = current_photo.prev().find('img').attr('src');
+								        current_photo = current_photo.prev();
+								        $('.lightbox').find('img').css('opacity', 0);
+								        $('.lightbox .backdrop').css('opacity', 0);
+								        $('.lightbox .backdrop').css('background-image', 'url('+src+')');
+								        setTimeout(function(){
+								        	$('.lightbox').find('img').attr('src', src);
+								        	$('.lightbox').find('img').css('opacity', 1);
+								        	$('.lightbox .backdrop').css('opacity', .3);
+								        },250);
+								    }
 							        break;
 
 							        case 38: // up
 							        break;
 
 							        case 39: // right
-							        console.log(current_photo);
-							        var src = current_photo.next().find('img').attr('src').replace('_z.jpg', '_h.jpg');
-							        current_photo = current_photo.next();
-							        $('.lightbox').find('img').css('opacity', 0);
-									$('.lightbox .backdrop').css('background-image', 'url('+src+')');
-									setTimeout(function(){
-							        	$('.lightbox').find('img').attr('src', src);
-							        	$('.lightbox').find('img').css('opacity', 1);
-							        },250);
+							        console.log(current_photo.next());
+							        if(current_photo.next().length != 0) {
+								        var src = current_photo.next().find('img').attr('src');
+								        current_photo = current_photo.next();
+								        $('.lightbox').find('img').css('opacity', 0);
+								        $('.lightbox .backdrop').css('opacity', 0);
+										$('.lightbox .backdrop').css('background-image', 'url('+src+')');
+										setTimeout(function(){
+								        	$('.lightbox').find('img').attr('src', src);
+								        	$('.lightbox').find('img').css('opacity', 1);
+								        	$('.lightbox .backdrop').css('opacity', .3);
+								        },250);
+									}
 							        break;
 
 							        case 40: // down
