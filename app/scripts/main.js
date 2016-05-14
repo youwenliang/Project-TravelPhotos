@@ -11,10 +11,31 @@ var loaded = 0;
 var current = 0;
 
 var initial = 20;
-var increment = 10;
+var increment = 30;
 var current_photo;
-var mode = 0;
+var mode = -1;
 var init = false;
+
+var albums = [];
+var covers = [];
+var cover_loaded = 0;
+
+function getAlbums() {
+	var request = new XMLHttpRequest();
+	request.open('GET', 'https://api.flickr.com/services/rest/?method=flickr.photosets.getList&api_key=b5915b4e4a36d456caa767bdb9003cbc&user_id=129588168%40N02&format=json&nojsoncallback=1');
+	request.setRequestHeader('Accept','application/json');
+
+	request.onreadystatechange = function () {
+	  if (this.readyState === 4) {
+	    var data = jQuery.parseJSON(this.responseText);
+	    console.log(data);
+	    for(var i = 0; i < data.photosets.total; i++) {
+	    	getCoverPhoto(data.photosets.photoset[i].primary, i, data.photosets.total, data);
+	    }
+	  }
+	};
+	request.send();
+};
 
 function getAlbumInfo(photoset_id) {
 	var request = new XMLHttpRequest();
@@ -71,7 +92,7 @@ function getAlbumPhotos(photoset_id) {
 				    			var img = new Image;
 						        img.src = $('.album-banner-black').css('background-image').replace(/url\(\"|\"\)$/ig, "");
 						        $(img).one('load', function(){
-				    				$('body').css('opacity',1);
+				    				$('.album-banner, #filtering').css('opacity',1);
 				    			});
 				    		}
 				    		getPhotoInfo(photos[j].id, photos[j].secret, j);
@@ -90,7 +111,7 @@ function getAlbumPhotos(photoset_id) {
 	    			var img = new Image;
 			        img.src = $('.album-banner-black').css('background-image').replace(/url\(\"|\"\)$/ig, "");
 			        $(img).one('load', function(){
-	    				$('body').css('opacity',1);
+	    				$('.album-banner, #filtering').css('opacity',1);
 	    			});
 	    		}
 	    		getPhotoInfo(photos[j].id, photos[j].secret, j);
@@ -100,6 +121,50 @@ function getAlbumPhotos(photoset_id) {
 	};
 	request.send();
 };
+
+function getCoverPhoto(photo_id, k, total, data) {
+	var request = new XMLHttpRequest();
+	request.open('GET', 'https://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key=b5915b4e4a36d456caa767bdb9003cbc&photo_id='+photo_id+'&format=json&nojsoncallback=1');
+	request.setRequestHeader('Accept','application/json');
+
+	request.onreadystatechange = function () {
+		if (this.readyState === 4) {
+		  var data1 = jQuery.parseJSON(this.responseText);
+		  covers[k] = "https://farm"+data1.photo.farm+".staticflickr.com/"+data1.photo.server+"/"+data1.photo.id+"_"+data1.photo.secret+"_h.jpg";
+			albums[k] = {
+				country_name:data.photosets.photoset[k].title._content.split('Trip')[0],
+				album_cover:covers[k],
+				photo_numbers:data.photosets.photoset[k].photos,
+				album_id: data.photosets.photoset[k].id
+			}
+			cover_loaded++;
+			if(cover_loaded == total) {
+				console.log(albums);
+				for( var j = 0; j < total; j++) {
+					$('.albums').append('<a href="#'+albums[j].country_name+'"><div class="col-md-4 col-xs-12"><div class="album" data-id="'+albums[j].album_id+'" style="background-image: url('+ albums[j].album_cover +')"><h2 class="album-country">'+ albums[j].country_name +'</h2></div></div>');
+					if(j+1 == total) {
+						$('.album').last().css('padding-bottom', '70px');
+						$('.album').click(function(){
+							console.log("?!?!?!");
+							setTimeout(function(){
+								$('.album-list').css('opacity', 0);
+							},10);
+							var $this = $(this);
+							setTimeout(function(){
+								mode = 0;
+								console.log($this.attr('data-id'));
+								getAlbumInfo($this.attr('data-id'));
+								getAlbumPhotos($this.attr('data-id'));
+								$('.album-list').css('display', 'none');
+							},260);
+						});
+					}
+				}
+			}
+		}
+	};
+	request.send();
+}
 
 function getPhotoInfo(photo_id, photo_secret, k) {
 	var request = new XMLHttpRequest();
@@ -179,8 +244,9 @@ function unique(list) {
 var album_id = "72157667507455746";
 
 $(document).ready(function(){
-	getAlbumInfo(album_id);
-	getAlbumPhotos(album_id);
+	getAlbums();
+	// getAlbumInfo(album_id);
+	// getAlbumPhotos(album_id);
 
 	$('#close').click(function(){
 		$('.button-group').children().css('opacity',0);
@@ -234,6 +300,22 @@ $(window).resize(function() {
     $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 });
 
+window.onhashchange = function() {
+ //blah blah blah
+ var url = window.location.href;
+ console.log(url);
+ if (url.match("#") == null) {
+
+ 	$('.album-list').css('display', 'block');
+ 	setTimeout(function(){
+ 		$('.album-list').css('opacity', 1);
+ 	}, 10);
+	 setTimeout(function(){
+	 	resetAlbum();
+	 },260);
+ }
+}
+
 var flag = false;
 
 $(window).scroll(function() {
@@ -252,6 +334,24 @@ $(window).scroll(function() {
 $('.grid').on( 'layoutComplete', function( event, filteredItems ) {
     $('.grid').css('margin-left', ($(window).width()-$('.grid').width())/2);
 });
+
+function resetAlbum(){
+	photos = [];
+	photos_info = [];
+	tags = [];
+	counter = 0;
+	loaded = 0;
+	current = 0;
+	initial = 20;
+	increment = 30;
+	mode = -1;
+	if($('.grid').children().length != 0) $('.grid').isotope('destroy');
+	$('.grid').empty();
+	$('.album-banner h1, .album-banner span').empty();
+	$('.album-banner, #filtering').css('opacity',0);
+	$('.album-banner-black').css('background-image', '');
+	$('.button-group').empty();
+}
 
 //Append Photos
 function appendPhotos(number){
@@ -284,7 +384,6 @@ function appendPhotos(number){
 	        var $this = $(this);
 	        var img = new Image;
 	        img.src = $this.find('img').attr('src').replace(/url\(\"|\"\)$/ig, "");
-	        $this.css('background-image', "url("+$this.find('img').attr('src').replace('_h.jpg', '_t.jpg')+")");
 	        $(img).one('load', function(){
 	            if(number > initial) {
 	            	$this.find('img').css('opacity',1);
@@ -292,6 +391,7 @@ function appendPhotos(number){
 	        });
 	        var thumb = new Image;
 	        thumb.src = $this.find('img').attr('src').replace(/url\(\"|\"\)$/ig, "").replace('_h.jpg', '_t.jpg');
+	        $this.css('background-image', "url("+thumb.src+")");
 	        $(thumb).one('load', function(){
 	        	var bgImgWidth = img.width;
 	            var bgImgHeight = img.height;
