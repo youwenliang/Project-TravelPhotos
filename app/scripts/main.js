@@ -141,11 +141,13 @@ function getCoverPhoto(photo_id, k, total, data) {
 			if(cover_loaded == total) {
 				console.log(albums);
 				for( var j = 0; j < total; j++) {
-					$('.albums').append('<a href="#'+albums[j].country_name+'"><div class="col-md-4 col-xs-12"><div class="album" data-id="'+albums[j].album_id+'" style="background-image: url('+ albums[j].album_cover +')"><h2 class="album-country">'+ albums[j].country_name +'</h2></div></div>');
+					$('.albums').append('<a href="#'+albums[j].album_id+'"><div class="col-md-4 col-xs-12"><div class="album" data-id="'+albums[j].album_id+'" style="background-image: url('+ albums[j].album_cover +')"><h2 class="album-country">'+ albums[j].country_name +'</h2></div></div>');
 					if(j+1 == total) {
 						$('.album').last().css('padding-bottom', '70px');
 						$('.album').click(function(){
 							console.log("?!?!?!");
+
+							//Click Album
 							setTimeout(function(){
 								$('.album-list').css('opacity', 0);
 							},10);
@@ -244,7 +246,21 @@ function unique(list) {
 var album_id = "72157667507455746";
 
 $(document).ready(function(){
+	
+	// Initialized URL
+	var url = window.location.href;
+	if (url.match("#") != null) {
+		mode = 0;
+		getAlbumInfo(url.split("#")[1]);
+		getAlbumPhotos(url.split("#")[1]);
+ 	}
+ 	else {
+ 		$('.album-list').css('opacity', 1);
+		$('.album-list').css('display', 'block');
+ 	}
+
 	getAlbums();
+
 	// getAlbumInfo(album_id);
 	// getAlbumPhotos(album_id);
 
@@ -345,6 +361,7 @@ function resetAlbum(){
 	initial = 20;
 	increment = 30;
 	mode = -1;
+	$('.loading').css('opacity',1);
 	if($('.grid').children().length != 0) $('.grid').isotope('destroy');
 	$('.grid').empty();
 	$('.album-banner h1, .album-banner span').empty();
@@ -401,6 +418,7 @@ function appendPhotos(number){
 
 	        if(checking == $('.photo').length){
 		        console.log("done!!");
+		        $('.loading').css("opacity", 0);
 	        	
 	        	if(number > initial) {
 		            var $grid = $('.grid').isotope({
@@ -478,6 +496,19 @@ function PhotosDone(){
 	$(document).keydown(function(e) {
 		if(mode == 1) {
 		    switch(e.which) {
+
+		    	case 27: // ESC
+		    	$('.lightbox').css('opacity',0);
+				// $('body').css('overflow-y', 'scroll');
+				setTimeout(function(){
+					$('.lightbox').find('img').attr('src', '');		
+					$('.lightbox').css('z-index',-1);
+					$('.lightbox img').css('opacity',0);
+				},250);
+				mode = 0;
+		    	break;
+
+				case 38: // up		    	
 		        case 37: // left
 		        console.log(current_photo.prev());
 		        if(current_photo.prev().length != 0) {
@@ -485,18 +516,16 @@ function PhotosDone(){
 			        current_photo = current_photo.prev();
 			        $('.lightbox').find('img').css('opacity', 0);
 			        $('.lightbox .backdrop').css('opacity', 0);
-			        $('.lightbox .backdrop').css('background-image', 'url('+src+')');
 			        setTimeout(function(){
 			        	$('.lightbox').find('img').attr('src', src);
 			        	$('.lightbox').find('img').css('opacity', 1);
+			        	$('.lightbox .backdrop').css('background-image', 'url('+src+')');
 			        	$('.lightbox .backdrop').css('opacity', .3);
 			        },250);
 			    }
 		        break;
 
-		        case 38: // up
-		        break;
-
+		        case 40: // down
 		        case 39: // right
 		        console.log(current_photo.next());
 		        if(current_photo.next().length != 0) {
@@ -504,16 +533,13 @@ function PhotosDone(){
 			        current_photo = current_photo.next();
 			        $('.lightbox').find('img').css('opacity', 0);
 			        $('.lightbox .backdrop').css('opacity', 0);
-					$('.lightbox .backdrop').css('background-image', 'url('+src+')');
 					setTimeout(function(){
 			        	$('.lightbox').find('img').attr('src', src);
 			        	$('.lightbox').find('img').css('opacity', 1);
+			        	$('.lightbox .backdrop').css('background-image', 'url('+src+')');
 			        	$('.lightbox .backdrop').css('opacity', .3);
 			        },250);
 				}
-		        break;
-
-		        case 40: // down
 		        break;
 
 		        default: return; // exit this handler for other keys

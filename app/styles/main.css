@@ -300,6 +300,8 @@ body {
   margin-bottom: 230px;
   -webkit-transition: opacity .25s ease-in-out;
   transition: opacity .25s ease-in-out;
+  display: none;
+  opacity: 0;
 }
 
 .page-info a{
@@ -506,6 +508,21 @@ body {
 
 /* ---- Grid ---- */
 
+.loading {
+  background:url("flickr.gif") no-repeat;
+  display: block;
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  -webkit-transition: opacity .4s ease-in-out;
+  transition: opacity .4s ease-in-out;
+}
+
 .grid {
   /*background: #EEE;*/
   position: relative;
@@ -572,8 +589,8 @@ body {
   display: block;
   top: 0;
   opacity: 0;
-  -webkit-transition: opacity .25s ease-in-out;
-  transition: opacity .25s ease-in-out;
+  -webkit-transition: opacity .1s ease-in-out;
+  transition: opacity .1s ease-in-out;
 }
 
 .lightbox .backdrop {
@@ -590,8 +607,8 @@ body {
   filter: blur(5px);
   -webkit-filter: blur(5px);
   margin: -5px -10px -10px -5px;
-  -webkit-transition: opacity .2s ease-in-out;
-  transition: opacity .2s ease-in-out;
+  -webkit-transition: opacity .1s ease-in-out;
+  transition: opacity .1s ease-in-out;
 }
 
 .lightbox img {
@@ -604,7 +621,7 @@ body {
   max-width: 95%;
   max-height: 95%;
   opacity: 0;
-  -webkit-transition: opacity .2s ease-in-out;
-  transition: opacity .2s ease-in-out;
+  -webkit-transition: opacity .1s ease-in-out;
+  transition: opacity .1s ease-in-out;
   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
